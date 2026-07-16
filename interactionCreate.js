@@ -36,7 +36,7 @@ module.exports = async (interaction) => {
 
             const precio = new TextInputBuilder()
                 .setCustomId("precio")
-                .setLabel("¿Cuál es tu precio?")
+                .setLabel("¿Cuál es tu precio y metodo de pago que buscas?")
                 .setStyle(TextInputStyle.Short)
                 .setRequired(true);
 
