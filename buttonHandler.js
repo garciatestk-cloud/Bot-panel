@@ -169,7 +169,6 @@ module.exports = async (interaction) => {
 
             });
 
-
         }
 
 
@@ -303,6 +302,7 @@ El comprador revisará tu ticket pronto.`
 
 
 
+
         const botonCerrar =
         new ActionRowBuilder()
 
@@ -340,6 +340,18 @@ El comprador revisará tu ticket pronto.`
             components:[
                 botonCerrar
             ]
+
+        });
+
+
+
+
+
+        // QUITAR BOTONES DE LA REVISIÓN
+
+        await interaction.message.edit({
+
+            components: []
 
         });
 
