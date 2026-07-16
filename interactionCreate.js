@@ -46,6 +46,14 @@ module.exports = async (interaction) => {
                 .setLabel("¿Estás de acuerdo con lo mencionado?")
                 .setStyle(TextInputStyle.Short)
                 .setRequired(true);
+            
+
+            const metodoPago = new TextInputBuilder()
+                .setCustomId("metodoPago")
+                .setLabel("¿Qué método de pago prefieres recibir?")
+                .setStyle(TextInputStyle.Short)
+                .setPlaceholder("Ejemplo: Robux, PayPal, Banco...")
+                .setRequired(true);
 
 
             const cuestionar = new TextInputBuilder()
@@ -66,6 +74,9 @@ module.exports = async (interaction) => {
 
                 new ActionRowBuilder()
                     .addComponents(acuerdo),
+
+                new ActionRowBuilder()
+                    .addComponents(metodoPago)
 
                 new ActionRowBuilder()
                     .addComponents(cuestionar)
@@ -99,7 +110,9 @@ module.exports = async (interaction) => {
         const acuerdo =
             interaction.fields.getTextInputValue("acuerdo");
 
-
+        const metodoPago =
+            interaction.fields.getTextInputValue("metodoPago");
+        
         const cuestionar =
             interaction.fields.getTextInputValue("cuestionar");
 
@@ -114,6 +127,8 @@ module.exports = async (interaction) => {
             precio,
 
             acuerdo,
+
+            metodoPago,
 
             cuestionar,
 
