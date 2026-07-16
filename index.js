@@ -67,7 +67,7 @@ client.once(Events.ClientReady, async () => {
 
         .setTitle("TIENDA UNIVERSAL")
 
-        .setDescription(`# SHOP DE OBJETOS <💸>
+        .setDescription(`# SHOP DE OBJETOS 💸
 Abrimos una tienda para compra de objetos:
 
 **STEAL A BRAINROT, MURDER MISTERY, JAILBREAK, ADOPT ME, entre otros…**
