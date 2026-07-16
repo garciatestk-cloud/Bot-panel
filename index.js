@@ -65,9 +65,9 @@ client.once(Events.ClientReady, async () => {
 
         .setColor("#8B5CF6")
 
-        .setTitle("SHOP DE OBJETOS")
+        .setTitle("TIENDA UNIVERSAL")
 
-        .setDescription(`# SHOP DE OBJETOS <<a:money:1258873876763508737>>
+        .setDescription(`# SHOP DE OBJETOS <a:money:1258873876763508737>
 
 Abrimos una tienda para compra de objetos:
 
