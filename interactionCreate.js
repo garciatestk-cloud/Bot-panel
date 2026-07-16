@@ -76,7 +76,7 @@ module.exports = async (interaction) => {
                     .addComponents(acuerdo),
 
                 new ActionRowBuilder()
-                    .addComponents(metodoPago)
+                    .addComponents(metodoPago),
 
                 new ActionRowBuilder()
                     .addComponents(cuestionar)
