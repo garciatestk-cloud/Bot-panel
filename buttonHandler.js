@@ -72,6 +72,7 @@ module.exports = async (interaction) => {
 
 
 
+
     // APROBAR SOLICITUD
 
     if (
@@ -84,8 +85,28 @@ module.exports = async (interaction) => {
 
 
 
-        const usuario =
-        await interaction.guild.members.fetch(usuarioId);
+        let usuario;
+
+        try {
+
+            usuario =
+            await interaction.guild.members.fetch(usuarioId);
+
+
+        } catch(error) {
+
+
+            return interaction.reply({
+
+                content:
+                "❌ No se pudo encontrar al usuario en el servidor.",
+
+                ephemeral:true
+
+            });
+
+        }
+
 
 
 
@@ -96,21 +117,45 @@ module.exports = async (interaction) => {
 
 
 
+        if (!categoria) {
+
+
+            return interaction.reply({
+
+                content:
+                "❌ No se encontró la categoría de tickets.",
+
+                ephemeral:true
+
+            });
+
+
+        }
+
+
+
+
         const canal =
         await interaction.guild.channels.create({
+
 
             name:
             `・⟦📑⟧・venta-${usuario.user.username}`,
 
+
+
             type:
             ChannelType.GuildText,
+
 
 
             parent:
             categoria.id,
 
 
+
             permissionOverwrites: [
+
 
                 {
 
@@ -119,10 +164,13 @@ module.exports = async (interaction) => {
 
 
                     deny:[
+
                         PermissionFlagsBits.ViewChannel
+
                     ]
 
                 },
+
 
 
                 {
@@ -144,10 +192,11 @@ module.exports = async (interaction) => {
                 },
 
 
+
                 {
 
                     id:
-                    config.TICKET_ROLE,
+                    config.STAFF_ROLE,
 
 
                     allow:[
@@ -162,6 +211,7 @@ module.exports = async (interaction) => {
 
                 }
 
+
             ]
 
         });
@@ -170,11 +220,15 @@ module.exports = async (interaction) => {
 
 
 
+
         const embed = new EmbedBuilder()
+
 
         .setColor("#8B5CF6")
 
+
         .setTitle("📑 Ticket de venta")
+
 
         .setDescription(
 
@@ -186,18 +240,23 @@ Por favor proporciona la información necesaria.`
 
         )
 
+
         .setTimestamp();
+
+
 
 
 
         await canal.send({
 
             content:
-            `<@${usuarioId}> <@&${config.TICKET_ROLE}>`,
+            `<@${usuarioId}> <@&${config.STAFF_ROLE}>`,
 
             embeds:[embed]
 
         });
+
+
 
 
 
@@ -212,14 +271,19 @@ Por favor proporciona la información necesaria.`
 
 
 
+
+
         try {
 
+
             await usuario.send(
+
                 `✅ Tu solicitud fue aprobada. Tu ticket fue creado en ${canal}`
+
             );
 
 
-        } catch(error){}
+        } catch(error) {}
 
 
 
