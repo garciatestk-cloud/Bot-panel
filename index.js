@@ -5,15 +5,14 @@ const {
     Events,
     EmbedBuilder,
     ActionRowBuilder,
-    StringSelectMenuBuilder,
-    ButtonBuilder,
-    ButtonStyle
+    StringSelectMenuBuilder
 } = require("discord.js");
 
 
 const config = require("./config");
 const interactionCreate = require("./interactionCreate");
 const dmHandler = require("./dmHandler");
+const buttonHandler = require("./buttonHandler");
 
 
 const client = new Client({
@@ -51,7 +50,6 @@ client.once(Events.ClientReady, async () => {
     const channel = await client.channels.fetch(
         config.PANEL_CHANNEL
     );
-
 
 
     if (!channel) {
@@ -127,6 +125,7 @@ Selecciona una opción del menú para comenzar.`)
 
 
     const row = new ActionRowBuilder()
+
         .addComponents(menu);
 
 
@@ -168,7 +167,7 @@ Selecciona una opción del menú para comenzar.`)
 
 
 
-// MENÚ Y MODAL
+// MENÚ, MODAL Y BOTONES
 
 client.on(
     Events.InteractionCreate,
@@ -177,10 +176,16 @@ client.on(
 
         try {
 
+
             await interactionCreate(interaction);
 
 
+            await buttonHandler(interaction);
+
+
+
         } catch(error) {
+
 
             console.error(error);
 
@@ -195,11 +200,13 @@ client.on(
 
             await interaction.reply({
 
-                content: "❌ Ocurrió un error.",
+                content:
+                "❌ Ocurrió un error.",
 
-                ephemeral: true
+                ephemeral:true
 
             });
+
 
         }
 
@@ -211,27 +218,36 @@ client.on(
 
 
 
-// IMÁGENES POR DM
+// IMAGEN RECIBIDA POR DM
 
-client.on("messageCreate", async (message) => {
-
-
-    try {
-
-        await dmHandler(message, client);
+client.on(
+    "messageCreate",
+    async (message) => {
 
 
-    } catch(error) {
+        try {
 
-        console.error(
-            "Error en DM:",
-            error
-        );
+
+            await dmHandler(
+                message,
+                client
+            );
+
+
+        } catch(error) {
+
+
+            console.error(
+                "Error en DM:",
+                error
+            );
+
+
+        }
+
 
     }
-
-
-});
+);
 
 
 
