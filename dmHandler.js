@@ -73,6 +73,9 @@ ${solicitud.precio}
 ✅ Acepta condiciones:
 ${solicitud.acuerdo}
 
+💳 Método de pago:
+${solicitud.metodoPago}
+
 ❓ Cuestionará al comprador:
 ${solicitud.cuestionar}`
         )
