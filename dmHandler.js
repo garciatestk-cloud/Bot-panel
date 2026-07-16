@@ -67,7 +67,7 @@ module.exports = async (message, client) => {
 📦 Objeto:
 ${solicitud.objeto}
 
-💰 Precio:
+💰 Precio y metodo de pago:
 ${solicitud.precio}
 
 ✅ Acepta condiciones:
