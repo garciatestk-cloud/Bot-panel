@@ -27,6 +27,6 @@ module.exports = {
 
     // Imagen del panel
     PANEL_IMAGE:
-    "https://cdn.discordapp.com/attachments/1527392680454389851/1527437730450116698/301_sin_titulo_20260716161156.png?ex=6a5aa8bd&is=6a59573d&hm=b739e85735bc9c3dc873274911d81cd5161ee2458660c5d232b62283da2877ed&"
+    "https://cdn.discordapp.com/attachments/1527392680454389851/1527442323170922647/F86A8603-6BCB-4193-8729-09163B411DA2.png?ex=6a5aad04&is=6a595b84&hm=72dc01f7b3019c35dcf8bf399830b2cba8a0cf0d2a54d66c49907d89e74a9e05&"
 
 };
