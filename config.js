@@ -1,1 +1,24 @@
+module.exports = {
+    token: process.env.TOKEN,
 
+    // Canal donde se enviará el panel
+    PANEL_CHANNEL: "1527392680454389851",
+
+    // Canal donde llegan las solicitudes
+    REVIEW_CHANNEL: "1527391472599433328",
+
+    // Categoría donde se crean los tickets
+    TICKET_CATEGORY: "1527413169176449094",
+
+    // Rol que puede ver todos los tickets
+    STAFF_ROLE: "1527390169315934258",
+
+    // Roles que revisan las solicitudes
+    REVIEWER_ROLES: [
+        "1434634809434575011",
+        "1425650675181817856"
+    ],
+
+    // Imagen del panel
+    PANEL_IMAGE: "https://cdn.discordapp.com/attachments/1426388948963299523/1527409235867074750/2974C36A-DA3F-45F4-83E3-F9EFF37C9229.gif?ex=6a5a8e33&is=6a593cb3&hm=21d2e2788d24541b87c919dbe3ec04376a50122fb6d94c515ffdd9486c68cb32&"
+};
