@@ -6,10 +6,13 @@ const {
 } = require("discord.js");
 
 
+const solicitudes = new Map();
+
+
 module.exports = async (interaction) => {
 
 
-    // Detectar el menú del panel
+    // MENÚ DESPLEGABLE
     if (
         interaction.isStringSelectMenu() &&
         interaction.customId === "shop_panel"
@@ -77,6 +80,64 @@ module.exports = async (interaction) => {
             await interaction.showModal(modal);
 
         }
+
+    }
+
+
+
+    // RESPUESTAS DEL MODAL
+    if (
+        interaction.isModalSubmit() &&
+        interaction.customId === "venta_modal"
+    ) {
+
+
+        const objeto =
+            interaction.fields.getTextInputValue("objeto");
+
+
+        const precio =
+            interaction.fields.getTextInputValue("precio");
+
+
+        const acuerdo =
+            interaction.fields.getTextInputValue("acuerdo");
+
+
+        const cuestionar =
+            interaction.fields.getTextInputValue("cuestionar");
+
+
+
+        solicitudes.set(interaction.user.id, {
+
+            usuario: interaction.user.id,
+
+            objeto,
+
+            precio,
+
+            acuerdo,
+
+            cuestionar,
+
+            imagen: null
+
+        });
+
+
+
+        await interaction.reply({
+
+            content:
+            "✅ Información recibida.\n\n" +
+            "📷 Ahora envía una imagen del objeto que quieres vender.\n\n" +
+            "Tienes 5 minutos para enviarla.",
+
+            ephemeral: true
+
+        });
+
 
     }
 
