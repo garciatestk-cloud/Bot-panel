@@ -19,6 +19,38 @@ module.exports = async (interaction) => {
 
 
 
+    // CERRAR TICKET
+
+    if (
+        interaction.customId === "cerrar_ticket"
+    ) {
+
+
+        await interaction.reply({
+
+            content:
+            "🔒 Cerrando ticket...",
+
+            ephemeral:true
+
+        });
+
+
+        setTimeout(async () => {
+
+            await interaction.channel.delete();
+
+        }, 3000);
+
+
+        return;
+
+    }
+
+
+
+
+
     // RECHAZAR SOLICITUD
 
     if (
@@ -139,6 +171,7 @@ module.exports = async (interaction) => {
 
 
         }
+
 
 
 
@@ -270,13 +303,43 @@ El comprador revisará tu ticket pronto.`
 
 
 
+        const botonCerrar =
+        new ActionRowBuilder()
+
+        .addComponents(
+
+            new ButtonBuilder()
+
+                .setCustomId(
+                    "cerrar_ticket"
+                )
+
+                .setLabel(
+                    "Cerrar Ticket"
+                )
+
+                .setEmoji("🔒")
+
+                .setStyle(
+                    ButtonStyle.Danger
+                )
+
+        );
+
+
+
+
 
         await canal.send({
 
             content:
             `<@${usuarioId}> <@&${config.STAFF_ROLE}>`,
 
-            embeds:[embed]
+            embeds:[embed],
+
+            components:[
+                botonCerrar
+            ]
 
         });
 
