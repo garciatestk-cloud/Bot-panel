@@ -77,12 +77,12 @@ Selecciona una opción del menú para comenzar.`)
 
     const menu = new StringSelectMenuBuilder()
         .setCustomId("shop_panel")
-        .setPlaceholder("📦 Selecciona una opción")
+        .setPlaceholder("💸 Selecciona una opción")
         .addOptions([
             {
                 label: "Venta de Objetos",
-                description: "Abrir una solicitud de venta",
-                emoji: "📦",
+                description: "Vender Objeto",
+                emoji: "💸",
                 value: "venta"
             }
         ]);
