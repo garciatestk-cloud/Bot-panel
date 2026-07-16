@@ -1,51 +1,33 @@
 const {
-Client,
-GatewayIntentBits,
-Partials,
-Collection
+    Client,
+    GatewayIntentBits,
+    Partials,
+    Events
 } = require("discord.js");
 
 const config = require("./config");
-const ready = require("./ready");
-const interactionCreate = require("./interactionCreate");
 
 const client = new Client({
-intents: [
-GatewayIntentBits.Guilds,
-GatewayIntentBits.GuildMembers,
-GatewayIntentBits.GuildMessages,
-GatewayIntentBits.MessageContent,
-GatewayIntentBits.DirectMessages
-],
-
-partials: [
-Partials.Channel,
-Partials.Message,
-Partials.User
-]
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.GuildMembers,
+        GatewayIntentBits.MessageContent,
+        GatewayIntentBits.DirectMessages
+    ],
+    partials: [
+        Partials.Channel
+    ]
 });
 
-client.commands = new Collection();
+client.once(Events.ClientReady, async () => {
 
-client.config = config;
+    console.clear();
 
-client.once("ready", async () => {
-
-console.clear();
-
-console.log("========================================");
-console.log(`🤖 Bot conectado como ${client.user.tag}`);
-console.log(`🆔 ${client.user.id}`);
-console.log("========================================");
-
-await ready(client);
+    console.log("==============================");
+    console.log(`✅ Conectado como ${client.user.tag}`);
+    console.log("==============================");
 
 });
 
-client.on("interactionCreate", async interaction => {
-
-await interactionCreate(interaction, client);
-
-});
-
-client.login(process.env.TOKEN);
+client.login(config.TOKEN);
