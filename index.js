@@ -67,7 +67,7 @@ client.once(Events.ClientReady, async () => {
 
         .setTitle("SHOP DE OBJETOS")
 
-        .setDescription(`# SHOP DE OBJETOS <a:money:1258873876763508737>
+        .setDescription(`# SHOP DE OBJETOS <<a:money:1258873876763508737>>
 
 Abrimos una tienda para compra de objetos:
 
