@@ -5,10 +5,15 @@ const {
     Events,
     EmbedBuilder,
     ActionRowBuilder,
-    StringSelectMenuBuilder
+    StringSelectMenuBuilder,
+    ButtonBuilder,
+    ButtonStyle
 } = require("discord.js");
 
+
 const config = require("./config");
+const solicitudes = require("./storage");
+const interactionCreate = require("./interactionCreate");
 
 
 const client = new Client({
@@ -33,16 +38,20 @@ const client = new Client({
 
 client.once(Events.ClientReady, async () => {
 
+
     console.clear();
+
 
     console.log("==============================");
     console.log(`✅ Conectado como ${client.user.tag}`);
     console.log("==============================");
 
 
+
     const channel = await client.channels.fetch(
         config.PANEL_CHANNEL
     );
+
 
 
     if (!channel) {
@@ -107,7 +116,7 @@ Selecciona una opción del menú para comenzar.`)
 
                 description: "Vender un objeto",
 
-                emoji: "💸",
+                emoji: "<:Robux:1422204392777715814>",
 
                 value: "venta"
 
@@ -126,6 +135,7 @@ Selecciona una opción del menú para comenzar.`)
     const mensajes = await channel.messages.fetch({
         limit: 10
     });
+
 
 
     const existe = mensajes.find(
@@ -157,21 +167,25 @@ Selecciona una opción del menú para comenzar.`)
 
 
 
-const interactionCreate = require("./interactionCreate");
 
-
+// INTERACCIONES (MENÚ Y MODAL)
 
 client.on(
     Events.InteractionCreate,
     async (interaction) => {
 
+
         try {
+
 
             await interactionCreate(interaction);
 
-        } catch (error) {
+
+        } catch(error) {
+
 
             console.error(error);
+
 
 
             if (
@@ -180,19 +194,154 @@ client.on(
             ) return;
 
 
+
             await interaction.reply({
 
                 content:
-                "❌ Ocurrió un error al procesar la solicitud.",
+                "❌ Ocurrió un error.",
 
-                ephemeral: true
+                ephemeral:true
 
             });
 
+
         }
+
 
     }
 );
+
+
+
+
+
+// RECIBIR IMAGEN DEL OBJETO
+
+client.on("messageCreate", async (message) => {
+
+
+    if (message.author.bot) return;
+
+
+
+    const solicitud = solicitudes.get(
+        message.author.id
+    );
+
+
+
+    if (!solicitud) return;
+
+
+
+    if (!message.attachments.size) return;
+
+
+
+    const imagen = message.attachments.first();
+
+
+
+    solicitud.imagen = imagen.url;
+
+
+
+    const canalRevision = await client.channels.fetch(
+        config.REVIEW_CHANNEL
+    );
+
+
+
+    const embed = new EmbedBuilder()
+
+        .setColor("#8B5CF6")
+
+        .setTitle("📦 Nueva solicitud de venta")
+
+        .setDescription(
+`👤 Usuario:
+<@${solicitud.usuario}>
+
+📦 Objeto:
+${solicitud.objeto}
+
+💰 Precio:
+${solicitud.precio}
+
+✅ Acepta condiciones:
+${solicitud.acuerdo}
+
+❓ Cuestionará al comprador:
+${solicitud.cuestionar}`
+        )
+
+        .setImage(solicitud.imagen)
+
+        .setTimestamp();
+
+
+
+    const botones = new ActionRowBuilder()
+
+        .addComponents(
+
+            new ButtonBuilder()
+
+                .setCustomId(
+                    `aprobar_${solicitud.usuario}`
+                )
+
+                .setLabel("Aprobar")
+
+                .setEmoji("✅")
+
+                .setStyle(ButtonStyle.Success),
+
+
+
+            new ButtonBuilder()
+
+                .setCustomId(
+                    `rechazar_${solicitud.usuario}`
+                )
+
+                .setLabel("Rechazar")
+
+                .setEmoji("❌")
+
+                .setStyle(ButtonStyle.Danger)
+
+        );
+
+
+
+    await canalRevision.send({
+
+        content:
+        `<@&${config.REVIEWER_ROLE_1}> <@&${config.REVIEWER_ROLE_2}>`,
+
+        embeds:[embed],
+
+        components:[botones]
+
+    });
+
+
+
+    solicitudes.delete(
+        message.author.id
+    );
+
+
+
+    await message.reply(
+        "✅ Imagen recibida. Tu solicitud fue enviada a revisión."
+    );
+
+
+});
+
+
 
 
 
