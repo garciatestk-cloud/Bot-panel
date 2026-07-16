@@ -1,7 +1,7 @@
 {
-  "name": "ticket-bot",
+  "name": "shop-tickets",
   "version": "1.0.0",
-  "description": "Bot de tickets para Discord",
+  "description": "Bot de tickets para Shop",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
