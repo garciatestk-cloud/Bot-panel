@@ -43,7 +43,7 @@ module.exports = async (interaction) => {
 
             const acuerdo = new TextInputBuilder()
                 .setCustomId("acuerdo")
-                .setLabel("¿Estás de acuerdo con lo mencionado?")
+                .setLabel("¿Estás de acuerdo con lo mencionado y si es asi que metodo de pago prefieres recibir?")
                 .setStyle(TextInputStyle.Short)
                 .setRequired(true);
 
