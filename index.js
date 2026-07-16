@@ -100,5 +100,27 @@ Selecciona una opción del menú para comenzar.`)
 
 });
 
+const interactionCreate = require("./interactionCreate");
 
+
+client.on(Events.InteractionCreate, async (interaction) => {
+
+    try {
+
+        await interactionCreate(interaction);
+
+    } catch (error) {
+
+        console.error(error);
+
+        if (interaction.replied || interaction.deferred) return;
+
+        await interaction.reply({
+            content: "❌ Ocurrió un error al procesar la solicitud.",
+            ephemeral: true
+        });
+
+    }
+
+});
 client.login(config.TOKEN);
