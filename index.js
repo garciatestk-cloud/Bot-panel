@@ -12,8 +12,8 @@ const {
 
 
 const config = require("./config");
-const solicitudes = require("./storage");
 const interactionCreate = require("./interactionCreate");
+const dmHandler = require("./dmHandler");
 
 
 const client = new Client({
@@ -127,7 +127,6 @@ Selecciona una opción del menú para comenzar.`)
 
 
     const row = new ActionRowBuilder()
-
         .addComponents(menu);
 
 
@@ -168,7 +167,8 @@ Selecciona una opción del menú para comenzar.`)
 
 
 
-// INTERACCIONES (MENÚ Y MODAL)
+
+// MENÚ Y MODAL
 
 client.on(
     Events.InteractionCreate,
@@ -177,12 +177,10 @@ client.on(
 
         try {
 
-
             await interactionCreate(interaction);
 
 
         } catch(error) {
-
 
             console.error(error);
 
@@ -197,13 +195,11 @@ client.on(
 
             await interaction.reply({
 
-                content:
-                "❌ Ocurrió un error.",
+                content: "❌ Ocurrió un error.",
 
-                ephemeral:true
+                ephemeral: true
 
             });
-
 
         }
 
@@ -215,128 +211,24 @@ client.on(
 
 
 
-// RECIBIR IMAGEN DEL OBJETO
+// IMÁGENES POR DM
 
 client.on("messageCreate", async (message) => {
 
 
-    if (message.author.bot) return;
+    try {
+
+        await dmHandler(message, client);
 
 
+    } catch(error) {
 
-    const solicitud = solicitudes.get(
-        message.author.id
-    );
-
-
-
-    if (!solicitud) return;
-
-
-
-    if (!message.attachments.size) return;
-
-
-
-    const imagen = message.attachments.first();
-
-
-
-    solicitud.imagen = imagen.url;
-
-
-
-    const canalRevision = await client.channels.fetch(
-        config.REVIEW_CHANNEL
-    );
-
-
-
-    const embed = new EmbedBuilder()
-
-        .setColor("#8B5CF6")
-
-        .setTitle("📦 Nueva solicitud de venta")
-
-        .setDescription(
-`👤 Usuario:
-<@${solicitud.usuario}>
-
-📦 Objeto:
-${solicitud.objeto}
-
-💰 Precio:
-${solicitud.precio}
-
-✅ Acepta condiciones:
-${solicitud.acuerdo}
-
-❓ Cuestionará al comprador:
-${solicitud.cuestionar}`
-        )
-
-        .setImage(solicitud.imagen)
-
-        .setTimestamp();
-
-
-
-    const botones = new ActionRowBuilder()
-
-        .addComponents(
-
-            new ButtonBuilder()
-
-                .setCustomId(
-                    `aprobar_${solicitud.usuario}`
-                )
-
-                .setLabel("Aprobar")
-
-                .setEmoji("✅")
-
-                .setStyle(ButtonStyle.Success),
-
-
-
-            new ButtonBuilder()
-
-                .setCustomId(
-                    `rechazar_${solicitud.usuario}`
-                )
-
-                .setLabel("Rechazar")
-
-                .setEmoji("❌")
-
-                .setStyle(ButtonStyle.Danger)
-
+        console.error(
+            "Error en DM:",
+            error
         );
 
-
-
-    await canalRevision.send({
-
-        content:
-        `<@&${config.REVIEWER_ROLE_1}> <@&${config.REVIEWER_ROLE_2}>`,
-
-        embeds:[embed],
-
-        components:[botones]
-
-    });
-
-
-
-    solicitudes.delete(
-        message.author.id
-    );
-
-
-
-    await message.reply(
-        "✅ Imagen recibida. Tu solicitud fue enviada a revisión."
-    );
+    }
 
 
 });
