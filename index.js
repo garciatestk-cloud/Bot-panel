@@ -75,9 +75,9 @@ Abrimos una tienda para compra de objetos:
 
 # FORMAS DE PAGO:
 
-**1.** <:Robux:1422204392777715814> Robux.
+**1.** <:Robux:1527435955814793427> Robux.
 
-**2.** <:PayPal:1436114209241825492> Paypal.
+**2.** <:PayPal:1527435918196215888> Paypal.
 
 **3.** Cualquier moneda internacional.
 
