@@ -108,26 +108,64 @@ module.exports = async (interaction) => {
         solicitudes.set(interaction.user.id, {
 
             usuario: interaction.user.id,
+
             objeto,
+
             precio,
+
             acuerdo,
+
             cuestionar,
-            imagen:null
+
+            imagen: null
 
         });
 
 
+
+        // RESPUESTA PRIVADA AL USUARIO
 
         await interaction.reply({
 
             content:
             "✅ Información recibida.\n\n" +
-            "📷 Ahora envía una imagen del objeto que quieres vender.\n" +
-            "Tienes 5 minutos para enviarla.",
+            "📩 Te envié un mensaje privado para que envíes la imagen del objeto.",
 
-            ephemeral:true
+            ephemeral: true
 
         });
+
+
+
+        // ENVIAR DM
+
+        try {
+
+
+            const dm = await interaction.user.createDM();
+
+
+
+            await dm.send({
+
+                content:
+                "📷 **Envíame ahora la imagen del objeto que quieres vender.**\n\n" +
+                "Cuando la envíes, será enviada al equipo de revisión."
+
+            });
+
+
+        } catch(error) {
+
+
+            console.log(
+                "❌ No se pudo enviar DM al usuario:",
+                error
+            );
+
+
+        }
+
 
     }
 
