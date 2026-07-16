@@ -6,6 +6,7 @@ const {
 
 
 const config = require("./config");
+const solicitudes = require("./storage");
 
 
 module.exports = async (interaction) => {
@@ -82,6 +83,10 @@ module.exports = async (interaction) => {
 
         const usuarioId =
             interaction.customId.split("_")[1];
+
+
+        const solicitud =
+            solicitudes.get(usuarioId);
 
 
 
@@ -234,7 +239,25 @@ module.exports = async (interaction) => {
 
 `Bienvenido <@${usuarioId}>.
 
-El comprador revisara tu ticket pronto.`
+📦 **Información de la solicitud**
+
+📦 Objeto:
+${solicitud?.objeto || "No registrado"}
+
+💰 Precio:
+${solicitud?.precio || "No registrado"}
+
+💳 Método de pago:
+${solicitud?.metodoPago || "No registrado"}
+
+✅ Acepta condiciones:
+${solicitud?.acuerdo || "No registrado"}
+
+❓ Cuestionará al comprador:
+${solicitud?.cuestionar || "No registrado"}
+
+
+El comprador revisará tu ticket pronto.`
 
         )
 
