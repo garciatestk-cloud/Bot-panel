@@ -31,7 +31,6 @@ module.exports = async (interaction) => {
                 .setCustomId("objeto")
                 .setLabel("¿Qué es lo que quieres vender?")
                 .setStyle(TextInputStyle.Paragraph)
-                .setPlaceholder("Escribe el objeto y detalles...")
                 .setRequired(true);
 
 
@@ -39,7 +38,6 @@ module.exports = async (interaction) => {
                 .setCustomId("precio")
                 .setLabel("¿Cuál es tu precio?")
                 .setStyle(TextInputStyle.Short)
-                .setPlaceholder("Ejemplo: 15 USD / 500 Robux")
                 .setRequired(true);
 
 
@@ -47,7 +45,6 @@ module.exports = async (interaction) => {
                 .setCustomId("acuerdo")
                 .setLabel("¿Estás de acuerdo con lo mencionado?")
                 .setStyle(TextInputStyle.Short)
-                .setPlaceholder("Sí / No")
                 .setRequired(true);
 
 
@@ -55,7 +52,6 @@ module.exports = async (interaction) => {
                 .setCustomId("cuestionar")
                 .setLabel("¿Cuestionarás al comprador?")
                 .setStyle(TextInputStyle.Short)
-                .setPlaceholder("Sí / No")
                 .setRequired(true);
 
 
@@ -85,7 +81,7 @@ module.exports = async (interaction) => {
 
 
 
-    // RESPUESTAS DEL MODAL
+    // RECIBIR MODAL
     if (
         interaction.isModalSubmit() &&
         interaction.customId === "venta_modal"
@@ -112,16 +108,11 @@ module.exports = async (interaction) => {
         solicitudes.set(interaction.user.id, {
 
             usuario: interaction.user.id,
-
             objeto,
-
             precio,
-
             acuerdo,
-
             cuestionar,
-
-            imagen: null
+            imagen:null
 
         });
 
@@ -131,13 +122,12 @@ module.exports = async (interaction) => {
 
             content:
             "✅ Información recibida.\n\n" +
-            "📷 Ahora envía una imagen del objeto que quieres vender.\n\n" +
+            "📷 Ahora envía una imagen del objeto que quieres vender.\n" +
             "Tienes 5 minutos para enviarla.",
 
-            ephemeral: true
+            ephemeral:true
 
         });
-
 
     }
 
