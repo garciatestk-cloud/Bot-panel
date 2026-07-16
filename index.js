@@ -10,7 +10,9 @@ const {
 
 const config = require("./config");
 
+
 const client = new Client({
+
     intents: [
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
@@ -18,10 +20,15 @@ const client = new Client({
         GatewayIntentBits.MessageContent,
         GatewayIntentBits.DirectMessages
     ],
+
     partials: [
-        Partials.Channel
+        Partials.Channel,
+        Partials.Message,
+        Partials.User
     ]
+
 });
+
 
 
 client.once(Events.ClientReady, async () => {
@@ -33,17 +40,26 @@ client.once(Events.ClientReady, async () => {
     console.log("==============================");
 
 
-    const channel = await client.channels.fetch(config.PANEL_CHANNEL);
+    const channel = await client.channels.fetch(
+        config.PANEL_CHANNEL
+    );
+
 
     if (!channel) {
+
         console.log("❌ No se encontró el canal del panel");
         return;
+
     }
 
 
+
     const embed = new EmbedBuilder()
+
         .setColor("#8B5CF6")
+
         .setTitle("SHOP DE OBJETOS")
+
         .setDescription(`# SHOP DE OBJETOS <a:money:1258873876763508737>
 
 Abrimos una tienda para compra de objetos:
@@ -72,55 +88,112 @@ Abrimos una tienda para compra de objetos:
 - 500 **ROBUX** en objetos.
 
 Selecciona una opción del menú para comenzar.`)
+
         .setImage(config.PANEL_IMAGE);
 
 
+
     const menu = new StringSelectMenuBuilder()
+
         .setCustomId("shop_panel")
+
         .setPlaceholder("💸 Selecciona una opción")
+
         .addOptions([
+
             {
+
                 label: "Venta de Objetos",
-                description: "Vender Objeto",
+
+                description: "Vender un objeto",
+
                 emoji: "💸",
+
                 value: "venta"
+
             }
+
         ]);
 
 
+
     const row = new ActionRowBuilder()
+
         .addComponents(menu);
 
 
-    await channel.send({
-        embeds: [embed],
-        components: [row]
+
+    const mensajes = await channel.messages.fetch({
+        limit: 10
     });
 
 
-});
+    const existe = mensajes.find(
 
-const interactionCreate = require("./interactionCreate");
+        msg =>
+
+        msg.author.id === client.user.id &&
+
+        msg.components.length > 0
+
+    );
 
 
-client.on(Events.InteractionCreate, async (interaction) => {
 
-    try {
+    if (!existe) {
 
-        await interactionCreate(interaction);
+        await channel.send({
 
-    } catch (error) {
+            embeds: [embed],
 
-        console.error(error);
+            components: [row]
 
-        if (interaction.replied || interaction.deferred) return;
-
-        await interaction.reply({
-            content: "❌ Ocurrió un error al procesar la solicitud.",
-            ephemeral: true
         });
 
     }
 
+
 });
+
+
+
+const interactionCreate = require("./interactionCreate");
+
+
+
+client.on(
+    Events.InteractionCreate,
+    async (interaction) => {
+
+        try {
+
+            await interactionCreate(interaction);
+
+        } catch (error) {
+
+            console.error(error);
+
+
+            if (
+                interaction.replied ||
+                interaction.deferred
+            ) return;
+
+
+            await interaction.reply({
+
+                content:
+                "❌ Ocurrió un error al procesar la solicitud.",
+
+                ephemeral: true
+
+            });
+
+        }
+
+    }
+);
+
+
+
 client.login(config.TOKEN);
