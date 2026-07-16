@@ -6,7 +6,7 @@ const {
 } = require("discord.js");
 
 
-const solicitudes = new Map();
+const solicitudes = require("./storage");
 
 
 module.exports = async (interaction) => {
