@@ -67,14 +67,14 @@ module.exports = async (message, client) => {
 📦 Objeto:
 ${solicitud.objeto}
 
-💰 Precio y metodo de pago:
+💰 Precio:
 ${solicitud.precio}
-
-✅ Acepta condiciones:
-${solicitud.acuerdo}
 
 💳 Método de pago:
 ${solicitud.metodoPago}
+
+✅ Acepta condiciones:
+${solicitud.acuerdo}
 
 ❓ Cuestionará al comprador:
 ${solicitud.cuestionar}`
@@ -132,9 +132,9 @@ ${solicitud.cuestionar}`
 
 
 
-    solicitudes.delete(
-        message.author.id
-    );
+    // Ya no borramos la solicitud aquí
+    // para que pueda usarse al crear el ticket
+
 
 
     await message.reply(
