@@ -234,9 +234,7 @@ module.exports = async (interaction) => {
 
 `Bienvenido <@${usuarioId}>.
 
-Un miembro del equipo atenderá tu venta.
-
-Por favor proporciona la información necesaria.`
+El comprador revisara tu ticket pronto.`
 
         )
 
