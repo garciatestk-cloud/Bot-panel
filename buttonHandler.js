@@ -22,31 +22,46 @@ module.exports = async (interaction) => {
     // CERRAR TICKET
 
     if (
-        interaction.customId === "cerrar_ticket"
+    interaction.customId === "cerrar_ticket"
+) {
+
+
+    if (
+        !interaction.member.roles.cache.has(config.STAFF_ROLE)
     ) {
 
-
-        await interaction.reply({
+        return interaction.reply({
 
             content:
-            "🔒 Cerrando ticket...",
+            "❌ Solo el equipo de soporte puede cerrar tickets.",
 
             ephemeral:true
 
         });
 
-
-        setTimeout(async () => {
-
-            await interaction.channel.delete();
-
-        }, 3000);
-
-
-        return;
-
     }
 
+
+    await interaction.reply({
+
+        content:
+        "🔒 Cerrando ticket...",
+
+        ephemeral:true
+
+    });
+
+
+    setTimeout(async () => {
+
+        await interaction.channel.delete();
+
+    }, 3000);
+
+
+    return;
+
+}
 
 
 
