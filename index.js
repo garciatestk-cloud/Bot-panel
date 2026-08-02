@@ -2,21 +2,16 @@ const {
     Client,
     GatewayIntentBits,
     Partials,
-    Events,
-    EmbedBuilder,
-    ActionRowBuilder,
-    StringSelectMenuBuilder
+    Events
 } = require("discord.js");
-
 
 const config = require("./config");
 const interactionCreate = require("./interactionCreate");
 const dmHandler = require("./dmHandler");
 const buttonHandler = require("./buttonHandler");
-
+const readyHandler = require("./ready");
 
 const client = new Client({
-
     intents: [
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
@@ -24,232 +19,93 @@ const client = new Client({
         GatewayIntentBits.MessageContent,
         GatewayIntentBits.DirectMessages
     ],
-
     partials: [
         Partials.Channel,
         Partials.Message,
         Partials.User
     ]
-
 });
 
-
-
+// EVENTO READY
 client.once(Events.ClientReady, async () => {
-
-
     console.clear();
-
-
     console.log("==============================");
     console.log(`✅ Conectado como ${client.user.tag}`);
     console.log("==============================");
 
-
-
-    const channel = await client.channels.fetch(
-        config.PANEL_CHANNEL
-    );
-
-
-    if (!channel) {
-
-        console.log("❌ No se encontró el canal del panel");
-        return;
-
-    }
-
-
-
-    const embed = new EmbedBuilder()
-
-        .setColor("#8B5CF6")
-
-        .setTitle("TIENDA UNIVERSAL")
-
-        .setDescription(`# SHOP DE OBJETOS 💸
-Abrimos una tienda para compra de objetos:
-
-**STEAL A BRAINROT, MURDER MISTERY, JAILBREAK, ADOPT ME, entre otros…**
-
-# FORMAS DE PAGO:
-
-**1.** <:Robux:1527435955814793427> Robux.
-
-**2.** <:PayPal:1527435918196215888> Paypal.
-
-**3.** Cualquier moneda internacional.
-
-**4.** Bancos de América latina.
-
--# • BBVA.
--# • Grupo Santander.
--# • Bancolombia.
--# • Itau.
--# • Scotiabank.
-
-# MÍNIMO DE COMPRA:
-
-- Equivalente a 15 **USD**.
-- 500 **ROBUX** en objetos.
-
-Selecciona una opción del menú para comenzar.`)
-
-        .setImage(config.PANEL_IMAGE);
-
-
-
-    const menu = new StringSelectMenuBuilder()
-
-        .setCustomId("shop_panel")
-
-        .setPlaceholder("💸 Selecciona una opción")
-
-        .addOptions([
-
-            {
-
-                label: "Venta de Objetos",
-
-                description: "Vender un objeto",
-
-                emoji: "<:Robux:1422204392777715814>",
-
-                value: "venta"
-
-            }
-
-        ]);
-
-
-
-    const row = new ActionRowBuilder()
-
-        .addComponents(menu);
-
-
-
-    const mensajes = await channel.messages.fetch({
-        limit: 10
-    });
-
-
-
-    const existe = mensajes.find(
-
-        msg =>
-
-        msg.author.id === client.user.id &&
-
-        msg.components.length > 0
-
-    );
-
-
-
-    if (!existe) {
-
-        await channel.send({
-
-            embeds: [embed],
-
-            components: [row]
-
-        });
-
-    }
-
-
+    // Enviar panales
+    await readyHandler(client);
 });
 
+// INTERACCIONES (MENÚS, MODALES, BOTONES)
+client.on(Events.InteractionCreate, async (interaction) => {
+    try {
+        await interactionCreate(interaction);
+        await buttonHandler(interaction);
+    } catch (error) {
+        console.error(error);
+        if (interaction.replied || interaction.deferred) return;
+        await interaction.reply({
+            content: "❌ Ocurrió un error.",
+            ephemeral: true
+        });
+    }
+});
 
+// MENSAJES (COMANDO Y DM)
+client.on(Events.MessageCreate, async (message) => {
+    try {
+        // Comando para personalizar el Panel de Bases
+        // Uso: !setpanel Título | Descripción | URL_DE_IMAGEN (opcional)
+        if (message.content.startsWith("!setpanel")) {
+            if (!message.member.roles.cache.has(config.STAFF_ROLE)) {
+                return message.reply("❌ Solo el staff puede usar este comando.");
+            }
 
+            const args = message.content.slice(9).trim().split("|");
+            const titulo = args[0]?.trim() || "📑 PANEL DE SOLICITUD DE BASES";
+            const descripcion = args[1]?.trim() || "Ingresar texto";
+            const imagen = args[2]?.trim() || message.attachments.first()?.url || null;
 
+            const { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder } = require("discord.js");
 
-// MENÚ, MODAL Y BOTONES
+            const embed = new EmbedBuilder()
+                .setColor("#a855f7")
+                .setTitle(titulo)
+                .setDescription(descripcion);
 
-client.on(
-    Events.InteractionCreate,
-    async (interaction) => {
+            if (imagen) embed.setImage(imagen);
 
+            const options = Object.keys(config.BASES).map(baseName => ({
+                label: baseName,
+                emoji: "⭐️",
+                value: baseName
+            }));
 
-        try {
+            const menu = new StringSelectMenuBuilder()
+                .setCustomId("base_panel")
+                .setPlaceholder("⭐️ Selecciona una Base")
+                .addOptions(options);
 
+            const row = new ActionRowBuilder().addComponents(menu);
 
-            await interactionCreate(interaction);
+            const canalBases = await client.channels.fetch(config.BASES_PANEL_CHANNEL);
+            if (canalBases) {
+                const messages = await canalBases.messages.fetch({ limit: 10 });
+                const oldPanel = messages.find(m => m.author.id === client.user.id);
+                if (oldPanel) await oldPanel.delete().catch(() => {});
 
-
-            await buttonHandler(interaction);
-
-
-
-        } catch(error) {
-
-
-            console.error(error);
-
-
-
-            if (
-                interaction.replied ||
-                interaction.deferred
-            ) return;
-
-
-
-            await interaction.reply({
-
-                content:
-                "❌ Ocurrió un error.",
-
-                ephemeral:true
-
-            });
-
-
+                await canalBases.send({ embeds: [embed], components: [row] });
+                return message.reply("✅ Panel actualizado correctamente en el canal.");
+            }
         }
 
+        // Manejador de mensajes privados
+        await dmHandler(message, client);
 
+    } catch (error) {
+        console.error("Error en MessageCreate:", error);
     }
-);
-
-
-
-
-
-// IMAGEN RECIBIDA POR DM
-
-client.on(
-    "messageCreate",
-    async (message) => {
-
-
-        try {
-
-
-            await dmHandler(
-                message,
-                client
-            );
-
-
-        } catch(error) {
-
-
-            console.error(
-                "Error en DM:",
-                error
-            );
-
-
-        }
-
-
-    }
-);
-
-
-
-
+});
 
 client.login(config.TOKEN);
