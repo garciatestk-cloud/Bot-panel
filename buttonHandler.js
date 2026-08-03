@@ -24,9 +24,12 @@ module.exports = async (interaction) => {
 
         if (interaction.customId === "cerrar_ticket") {
 
-            if (!interaction.member.roles.cache.has(config.STAFF_ROLE)) {
+            const esStaff = interaction.member.roles.cache.has(config.STAFF_ROLE);
+            const esCerrador = interaction.member.roles.cache.has(config.CLOSE_TICKET_ROLE);
+
+            if (!esStaff && !esCerrador) {
                 return interaction.reply({
-                    content: "❌ Solo el equipo autorizado puede cerrar tickets.",
+                    content: "❌ Solo el personal autorizado puede cerrar tickets.",
                     ephemeral: true
                 });
             }
@@ -135,7 +138,6 @@ module.exports = async (interaction) => {
 
                 const baseFormateada = solicitud.base.toLowerCase().replace(/\s+/g, "-");
 
-                // Nombre del canal corregido (sin la palabra "venta")
                 const canal = await interaction.guild.channels.create({
                     name: `・⟦📑⟧・${baseFormateada}-${usuario.user.username}`,
                     type: ChannelType.GuildText,
@@ -154,7 +156,7 @@ module.exports = async (interaction) => {
                             ]
                         },
                         {
-                            id: interaction.user.id, // Usuario que aceptó
+                            id: interaction.user.id,
                             allow: [
                                 PermissionFlagsBits.ViewChannel,
                                 PermissionFlagsBits.SendMessages,
@@ -162,7 +164,15 @@ module.exports = async (interaction) => {
                             ]
                         },
                         {
-                            id: roleId, // Permiso para el rol de la base elegida
+                            id: roleId,
+                            allow: [
+                                PermissionFlagsBits.ViewChannel,
+                                PermissionFlagsBits.SendMessages,
+                                PermissionFlagsBits.ReadMessageHistory
+                            ]
+                        },
+                        {
+                            id: config.CLOSE_TICKET_ROLE,
                             allow: [
                                 PermissionFlagsBits.ViewChannel,
                                 PermissionFlagsBits.SendMessages,
@@ -192,7 +202,6 @@ module.exports = async (interaction) => {
                         .setStyle(ButtonStyle.Danger)
                 );
 
-                // Menciona al usuario que solicitó y al ROL de la Base elegida
                 await canal.send({
                     content: `<@${usuarioId}> <@&${roleId}>`,
                     embeds: [embed],
@@ -245,6 +254,14 @@ module.exports = async (interaction) => {
                     },
                     {
                         id: config.STAFF_ROLE,
+                        allow: [
+                            PermissionFlagsBits.ViewChannel,
+                            PermissionFlagsBits.SendMessages,
+                            PermissionFlagsBits.ReadMessageHistory
+                        ]
+                    },
+                    {
+                        id: config.CLOSE_TICKET_ROLE,
                         allow: [
                             PermissionFlagsBits.ViewChannel,
                             PermissionFlagsBits.SendMessages,
