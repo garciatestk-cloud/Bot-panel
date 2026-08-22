@@ -324,6 +324,44 @@ El comprador revisará tu ticket pronto.`
 
         }
 
+
+
+
+        // LEÍDO POSTULACIÓN MIDDLEMAN
+
+        if (interaction.customId.startsWith("mm_leido_")) {
+
+            const esStaff = interaction.member.roles.cache.has(config.STAFF_ROLE);
+
+            if (!esStaff) {
+                return interaction.reply({
+                    content: "❌ Solo el personal autorizado puede marcar esto como leído.",
+                    ephemeral: true
+                });
+            }
+
+            const usuarioId = interaction.customId.split("_")[2];
+
+            try {
+                const usuario = await interaction.client.users.fetch(usuarioId);
+                await usuario.send(
+                    "📌 **¡Hola!** Te informamos que tu formulario de postulación para Middleman ya fue revisado por nuestro equipo. Los resultados oficiales se darán a conocer en un plazo de **1 a 3 días**. ¡Mucha suerte!"
+                );
+            } catch (error) {
+                console.log("No se pudo enviar DM al usuario postulante.");
+            }
+
+            await interaction.message.edit({
+                components: []
+            });
+
+            return await interaction.reply({
+                content: `✅ Marcado como leído. Se le notificó por DM al usuario <@${usuarioId}>.`,
+                ephemeral: true
+            });
+
+        }
+
     }
 
 
