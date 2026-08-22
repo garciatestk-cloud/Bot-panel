@@ -118,7 +118,44 @@ module.exports = async (interaction) => {
 
 
 
-    // --- 3. NUEVO SISTEMA MIDDLEMAN: ABRIR PARTE 1 (Preguntas 1 a 5) ---
+    // --- 3. MOSTRAR PREGUNTAS COMPLETAS (BOTÓN "Ver Preguntas") ---
+    if (interaction.isButton() && interaction.customId === "ver_preguntas_mm") {
+        return await interaction.reply({
+            content: 
+`📋 **Preguntas para la Postulación de Middleman:**
+
+**1.** ¿A qué rango deseas aplicar y cuál es tu garantía? Toma en cuenta que nos basamos en lo siguiente:
+• **Standard** = Valor: Garama (mínimo)
+• **Profesional** = Valor: 2 Garamas
+• **Superior** = Valor: 4 Garamas / 4.5
+• **Elite** = Valor: 8-9 Garamas
+• **Supervisor** = Valor: 17-19 Garamas
+
+**2.** ¿Estás consciente de que no puedes cobrar más del límite admitido en el panel?
+
+**3.** ¿Qué harías si alguno de los 2 miembros intenta estafar diciendo que ya te dio su Brainrot pero en realidad no te lo ha dado?
+
+**4.** ¿Estás de acuerdo con la normativa estricta de No opinar durante la atención de un ticket / Tradeo? ⚠️ Si lo haces perderás el rol de Middleman.
+
+**5.** ¿Si alguien tradea robux por brainrots que debes hacer o cómo les brindarías la atención?
+
+**6.** ¿Tienes servidor de Steal a Brainrot? (Obligatorio)
+
+**7.** ¿Estás de acuerdo con la normativa de no poder retener los brainrots de ambos usuarios? (⚠️ Hacer esto causará el retiro de tu rol)
+
+**8.** ¿Tienes experiencia previa como MiddleMan y si es así en donde?
+
+**9.** ¿Si tradean SAB por otro juego (Ejem: Adopt me) como les brindarías atención?
+
+**10.** ¿Estás de acuerdo con que la entrega de brainrots siempre debe ser con máquina? (⚠️ Es decir no puedes pedirle al usuario que ingrese a tu servidor)`,
+            ephemeral: true
+        });
+    }
+
+
+
+
+    // --- 4. NUEVO SISTEMA MIDDLEMAN: ABRIR PARTE 1 (Preguntas 1 a 5) ---
     if (interaction.isButton() && interaction.customId === "abrir_formulario_mm") {
 
         const modal = new ModalBuilder()
@@ -127,31 +164,31 @@ module.exports = async (interaction) => {
 
         const p1 = new TextInputBuilder()
             .setCustomId("p1")
-            .setLabel("1. ¿Garantía que daras?")
+            .setLabel("1. Rango y garantía deseada")
             .setStyle(TextInputStyle.Paragraph)
             .setRequired(true);
 
         const p2 = new TextInputBuilder()
             .setCustomId("p2")
-            .setLabel("2. ¿Estas consciente del límite de cobro?")
+            .setLabel("2. ¿Consciente del límite de cobro?")
             .setStyle(TextInputStyle.Short)
             .setRequired(true);
 
         const p3 = new TextInputBuilder()
             .setCustomId("p3")
-            .setLabel("3. ¿Qué harías si intentan tradear algo no acordado?")
+            .setLabel("3. Estafa con Brainrot (¿Qué harías?)")
             .setStyle(TextInputStyle.Paragraph)
             .setRequired(true);
 
         const p4 = new TextInputBuilder()
             .setCustomId("p4")
-            .setLabel("4. ¿Estas de acuerdo con no opinar durante el ticket?")
+            .setLabel("4. Normativa de No opinar")
             .setStyle(TextInputStyle.Paragraph)
             .setRequired(true);
 
         const p5 = new TextInputBuilder()
             .setCustomId("p5")
-            .setLabel("5. ¿Como atenderias Robux por Brainrots?")
+            .setLabel("5. Atención Robux por Brainrots")
             .setStyle(TextInputStyle.Paragraph)
             .setRequired(true);
 
@@ -170,7 +207,7 @@ module.exports = async (interaction) => {
 
 
 
-    // --- 4. RECIBIR PARTE 1 Y MOSTRAR MENÚ DESPLEGABLE PARA LA PARTE 2 ---
+    // --- 5. RECIBIR PARTE 1 Y MOSTRAR MENÚ DESPLEGABLE PARA LA PARTE 2 ---
     if (interaction.isModalSubmit() && interaction.customId === "modal_mm_parte1") {
 
         const respuestasParciales = {
@@ -208,7 +245,7 @@ module.exports = async (interaction) => {
 
 
 
-    // --- 5. ABRIR PARTE 2 MEDIANTE EL MENÚ DESPLEGABLE (Preguntas 6 a 10) ---
+    // --- 6. ABRIR PARTE 2 MEDIANTE EL MENÚ DESPLEGABLE (Preguntas 6 a 10) ---
     if (interaction.isStringSelectMenu() && interaction.customId === "menu_mm_parte2") {
 
         if (interaction.values[0] === "continuar_parte2") {
@@ -227,31 +264,31 @@ module.exports = async (interaction) => {
 
             const p6 = new TextInputBuilder()
                 .setCustomId("p6")
-                .setLabel("6. ¿Tienes Servidor de SAB? (Obligatorio)")
+                .setLabel("6. Servidor de SAB (Obligatorio)")
                 .setStyle(TextInputStyle.Short)
                 .setRequired(true);
 
             const p7 = new TextInputBuilder()
                 .setCustomId("p7")
-                .setLabel("7. Recuerda no retener los brainrots de ambos")
+                .setLabel("7. Normativa de no retener brainrots")
                 .setStyle(TextInputStyle.Paragraph)
                 .setRequired(true);
 
             const p8 = new TextInputBuilder()
                 .setCustomId("p8")
-                .setLabel("8. ¿Experiencia previa como MM y lugar?")
+                .setLabel("8. Experiencia previa como MM y lugar")
                 .setStyle(TextInputStyle.Paragraph)
                 .setRequired(true);
 
             const p9 = new TextInputBuilder()
                 .setCustomId("p9")
-                .setLabel("9. ¿Como atenderias SAB por otro juego? (Ej: Adopt Me)")
+                .setLabel("9. Tradear SAB por otro juego (Ej: Adopt Me)")
                 .setStyle(TextInputStyle.Paragraph)
                 .setRequired(true);
 
             const p10 = new TextInputBuilder()
                 .setCustomId("p10")
-                .setLabel("10. Recuerda siempre entregar brainrots por máquina")
+                .setLabel("10. Entrega de brainrots con máquina")
                 .setStyle(TextInputStyle.Paragraph)
                 .setRequired(true);
 
@@ -272,7 +309,7 @@ module.exports = async (interaction) => {
 
 
 
-    // --- 6. PROCESAR Y ENVIAR LAS 10 PREGUNTAS AL CANAL DE REVISIÓN ---
+    // --- 7. PROCESAR Y ENVIAR LAS 10 PREGUNTAS AL CANAL DE REVISIÓN ---
     if (interaction.isModalSubmit() && interaction.customId === "modal_mm_parte2") {
 
         const parte1 = solicitudes.get(`mm_temp_${interaction.user.id}`);
