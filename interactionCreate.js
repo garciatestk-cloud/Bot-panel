@@ -1,114 +1,158 @@
-const { ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
+const {
+    EmbedBuilder,
+    ActionRowBuilder,
+    ButtonBuilder,
+    ButtonStyle,
+    ModalBuilder,
+    TextInputBuilder,
+    TextInputStyle
+} = require("discord.js");
+
 const config = require("./config");
 const solicitudes = require("./storage");
 
+
 module.exports = async (interaction) => {
 
-    // --- TIENDA ANTERIOR ---
-    if (interaction.isStringSelectMenu() && interaction.customId === "shop_panel") {
-        if (interaction.values[0] === "venta") {
-            const modal = new ModalBuilder().setCustomId("venta_modal").setTitle("Venta de Objetos");
-            const objeto = new TextInputBuilder().setCustomId("objeto").setLabel("¿Qué es lo que quieres vender?").setStyle(TextInputStyle.Paragraph).setRequired(true);
-            const precio = new TextInputBuilder().setCustomId("precio").setLabel("¿Cuál es tu precio?").setStyle(TextInputStyle.Short).setRequired(true);
-            const acuerdo = new TextInputBuilder().setCustomId("acuerdo").setLabel("¿Estás de acuerdo con lo mencionado?").setStyle(TextInputStyle.Short).setRequired(true);
-            const metodoPago = new TextInputBuilder().setCustomId("metodoPago").setLabel("¿Qué método de pago prefieres recibir?").setStyle(TextInputStyle.Short).setPlaceholder("Ejemplo: Robux, PayPal, Banco...").setRequired(true);
-            const cuestionar = new TextInputBuilder().setCustomId("cuestionar").setLabel("¿Cuestionarás al comprador?").setStyle(TextInputStyle.Short).setRequired(true);
 
-            modal.addComponents(
-                new ActionRowBuilder().addComponents(objeto),
-                new ActionRowBuilder().addComponents(precio),
-                new ActionRowBuilder().addComponents(acuerdo),
-                new ActionRowBuilder().addComponents(metodoPago),
-                new ActionRowBuilder().addComponents(cuestionar)
-            );
-            return await interaction.showModal(modal);
-        }
-    }
-
-    if (interaction.isModalSubmit() && interaction.customId === "venta_modal") {
-        const objeto = interaction.fields.getTextInputValue("objeto");
-        const precio = interaction.fields.getTextInputValue("precio");
-        const acuerdo = interaction.fields.getTextInputValue("acuerdo");
-        const metodoPago = interaction.fields.getTextInputValue("metodoPago");
-        const cuestionar = interaction.fields.getTextInputValue("cuestionar");
-
-        solicitudes.set(interaction.user.id, {
-            tipo: "tienda",
-            usuario: interaction.user.id,
-            objeto, precio, acuerdo, metodoPago, cuestionar, imagen: null
-        });
-
-        await interaction.reply({ content: "✅ Información recibida.\n\n📩 Te envié un mensaje privado para que envíes la imagen del objeto.", ephemeral: true });
-
-        try {
-            const dm = await interaction.user.createDM();
-            await dm.send({ content: "📷 **Envíame ahora la imagen del objeto que quieres vender.**\n\nCuando la envíes, será enviada al equipo de revisión." });
-        } catch(e) { console.log("No se pudo enviar DM:", e); }
-        return;
-    }
-
-
-    // --- NUEVO SISTEMA DE BASES ---
+    // --- 1. SELECCIÓN DE BASE (MENÚ DESPLEGABLE) ---
     if (interaction.isStringSelectMenu() && interaction.customId === "base_panel") {
+
         const baseSeleccionada = interaction.values[0];
 
-        const modal = new ModalBuilder().setCustomId(`base_modal_${baseSeleccionada}`).setTitle(`Solicitud: ${baseSeleccionada}`);
-        const garantia = new TextInputBuilder().setCustomId("garantia").setLabel("1 • ¿Cuál es tu garantía?").setStyle(TextInputStyle.Paragraph).setRequired(true);
-        const pago = new TextInputBuilder().setCustomId("pago").setLabel("2 • ¿Pago?").setStyle(TextInputStyle.Short).setRequired(true);
+        const modal = new ModalBuilder()
+            .setCustomId(`solicitud_base_${baseSeleccionada}`)
+            .setTitle(`Postulación - ${baseSeleccionada}`);
+
+        const garantia = new TextInputBuilder()
+            .setCustomId("garantia")
+            .setLabel("¿Cuál es tu garantía?")
+            .setStyle(TextInputStyle.Short)
+            .setRequired(true);
+
+        const pago = new TextInputBuilder()
+            .setCustomId("pago")
+            .setLabel("Método o cantidad de pago")
+            .setStyle(TextInputStyle.Short)
+            .setRequired(true);
 
         modal.addComponents(
             new ActionRowBuilder().addComponents(garantia),
             new ActionRowBuilder().addComponents(pago)
         );
+
         return await interaction.showModal(modal);
+
     }
 
-    if (interaction.isModalSubmit() && interaction.customId.startsWith("base_modal_")) {
-        const baseNombre = interaction.customId.replace("base_modal_", "");
+
+
+
+    // --- 2. ENVÍO DE SOLICITUD DE BASE ---
+    if (
+        interaction.isModalSubmit() &&
+        interaction.customId.startsWith("solicitud_base_")
+    ) {
+
+        const base = interaction.customId.replace("solicitud_base_", "");
         const garantia = interaction.fields.getTextInputValue("garantia");
         const pago = interaction.fields.getTextInputValue("pago");
 
         solicitudes.set(interaction.user.id, {
             tipo: "base",
-            usuario: interaction.user.id,
-            base: baseNombre,
+            base,
             garantia,
             pago
         });
 
-        await interaction.reply({ content: "✅ Tu solicitud de base ha sido enviada a revisión.", ephemeral: true });
-
-        const canalRevision = await interaction.client.channels.fetch(config.BASES_REVIEW_CHANNEL);
-        if (!canalRevision) return;
-
-        const roleId = config.BASES[baseNombre];
-
-        const embed = new EmbedBuilder()
-            .setColor("#8B5CF6")
-            .setTitle(`📦 Solicitud - ${baseNombre}`)
-            .setDescription(`👤 **Usuario:** <@${interaction.user.id}>\n⭐️ **Base:** ${baseNombre}\n\n🛡️ **Garantía:**\n${garantia}\n\n💰 **Pago:**\n${pago}`)
-            .setTimestamp();
-
-        const botones = new ActionRowBuilder().addComponents(
-            new ButtonBuilder().setCustomId(`aprobar_${interaction.user.id}`).setLabel("Aprobar").setEmoji("✅").setStyle(ButtonStyle.Success),
-            new ButtonBuilder().setCustomId(`rechazar_${interaction.user.id}`).setLabel("Rechazar").setEmoji("❌").setStyle(ButtonStyle.Danger)
+        const canalRevision = interaction.guild.channels.cache.get(
+            config.BASES_REVIEW_CHANNEL
         );
 
-        await canalRevision.send({ content: `<@&${roleId}>`, embeds: [embed], components: [botones] });
+        if (!canalRevision) {
+            return interaction.reply({
+                content: "❌ No se encontró el canal de revisión de bases.",
+                ephemeral: true
+            });
+        }
+
+        const embed = new EmbedBuilder()
+            .setColor("#a855f7")
+            .setTitle(`⭐️ Nueva Solicitud de Base - ${base}`)
+            .setDescription(
+                `👤 **Usuario:** <@${interaction.user.id}>\n\n` +
+                `🛡️ **Garantía:** ${garantia}\n` +
+                `💰 **Pago:** ${pago}`
+            )
+            .setTimestamp();
+
+        const roleId = config.BASES[base];
+
+        const botones = new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+                .setCustomId(`aprobar_${interaction.user.id}`)
+                .setLabel("Aceptar")
+                .setEmoji("✅")
+                .setStyle(ButtonStyle.Success),
+            new ButtonBuilder()
+                .setCustomId(`rechazar_${interaction.user.id}`)
+                .setLabel("Rechazar")
+                .setEmoji("❌")
+                .setStyle(ButtonStyle.Danger)
+        );
+
+        await canalRevision.send({
+            content: roleId ? `<@&${roleId}>` : `<@&${config.STAFF_ROLE}>`,
+            embeds: [embed],
+            components: [botones]
+        });
+
+        return await interaction.reply({
+            content: "✅ Tu solicitud de base ha sido enviada al equipo correspondiente.",
+            ephemeral: true
+        });
+
     }
 
 
-    // --- NUEVO SISTEMA DE POSTULACIÓN MIDDLEMAN (ABRIR MODAL PARTE 1) ---
+
+
+    // --- 3. NUEVO SISTEMA MIDDLEMAN: ABRIR PARTE 1 (Preguntas 1 a 5) ---
     if (interaction.isButton() && interaction.customId === "abrir_formulario_mm") {
+
         const modal = new ModalBuilder()
-            .setCustomId("modal_postulacion_mm_parte1")
+            .setCustomId("modal_mm_parte1")
             .setTitle("Postulación Middleman (1/2)");
 
-        const p1 = new TextInputBuilder().setCustomId("p1").setLabel("1. Rango y garantía deseada").setStyle(TextInputStyle.Paragraph).setRequired(true);
-        const p2 = new TextInputBuilder().setCustomId("p2").setLabel("2. Conciencia sobre límite de cobro").setStyle(TextInputStyle.Short).setRequired(true);
-        const p3 = new TextInputBuilder().setCustomId("p3").setLabel("3. Estafa con Brainrot (¿Qué harías?)").setStyle(TextInputStyle.Paragraph).setRequired(true);
-        const p4 = new TextInputBuilder().setCustomId("p4").setLabel("4. Normativa de No opinar").setStyle(TextInputStyle.Short).setRequired(true);
-        const p5 = new TextInputBuilder().setCustomId("p5").setLabel("5. Atención Robux por Brainrots").setStyle(TextInputStyle.Paragraph).setRequired(true);
+        const p1 = new TextInputBuilder()
+            .setCustomId("p1")
+            .setLabel("1. Rango y garantía deseada")
+            .setStyle(TextInputStyle.Paragraph)
+            .setRequired(true);
+
+        const p2 = new TextInputBuilder()
+            .setCustomId("p2")
+            .setLabel("2. ¿Consciente del límite de cobro?")
+            .setStyle(TextInputStyle.Short)
+            .setRequired(true);
+
+        const p3 = new TextInputBuilder()
+            .setCustomId("p3")
+            .setLabel("3. Estafa con Brainrot (¿Qué harías?)")
+            .setStyle(TextInputStyle.Paragraph)
+            .setRequired(true);
+
+        const p4 = new TextInputBuilder()
+            .setCustomId("p4")
+            .setLabel("4. Normativa de No opinar (¿Estás de acuerdo?)")
+            .setStyle(TextInputStyle.Paragraph)
+            .setRequired(true);
+
+        const p5 = new TextInputBuilder()
+            .setCustomId("p5")
+            .setLabel("5. Atención Robux por Brainrots")
+            .setStyle(TextInputStyle.Paragraph)
+            .setRequired(true);
 
         modal.addComponents(
             new ActionRowBuilder().addComponents(p1),
@@ -119,29 +163,90 @@ module.exports = async (interaction) => {
         );
 
         return await interaction.showModal(modal);
+
     }
 
-    // --- PROCESAR PARTE 1 Y ABRIR PARTE 2 ---
-    if (interaction.isModalSubmit() && interaction.customId === "modal_postulacion_mm_parte1") {
-        solicitudes.set(`mm_temp_${interaction.user.id}`, {
+
+
+
+    // --- 4. RECIBIR PARTE 1 Y MOSTRAR BOTÓN PARA LA PARTE 2 (Preguntas 6 a 10) ---
+    if (interaction.isModalSubmit() && interaction.customId === "modal_mm_parte1") {
+
+        const respuestasParciales = {
             p1: interaction.fields.getTextInputValue("p1"),
             p2: interaction.fields.getTextInputValue("p2"),
             p3: interaction.fields.getTextInputValue("p3"),
             p4: interaction.fields.getTextInputValue("p4"),
             p5: interaction.fields.getTextInputValue("p5")
+        };
+
+        solicitudes.set(`mm_temp_${interaction.user.id}`, respuestasParciales);
+
+        const botonSiguiente = new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+                .setCustomId("abrir_mm_parte2")
+                .setLabel("Continuar con la Parte 2")
+                .setEmoji("➡️")
+                .setStyle(ButtonStyle.Secondary)
+        );
+
+        return await interaction.reply({
+            content: "✅ **¡Primera parte guardada con éxito!** Haz clic en el botón de abajo para responder las últimas preguntas de tu postulación.",
+            components: [botonSiguiente],
+            ephemeral: true
         });
 
-        const modal2 = new ModalBuilder()
-            .setCustomId("modal_postulacion_mm_parte2")
+    }
+
+
+
+
+    // --- 5. ABRIR PARTE 2 (Preguntas 6 a 10) ---
+    if (interaction.isButton() && interaction.customId === "abrir_mm_parte2") {
+
+        const temporal = solicitudes.get(`mm_temp_${interaction.user.id}`);
+        if (!temporal) {
+            return interaction.reply({
+                content: "❌ Tus respuestas anteriores expiraron. Por favor, vuelve a iniciar el formulario desde el panel principal.",
+                ephemeral: true
+            });
+        }
+
+        const modal = new ModalBuilder()
+            .setCustomId("modal_mm_parte2")
             .setTitle("Postulación Middleman (2/2)");
 
-        const p6 = new TextInputBuilder().setCustomId("p6").setLabel("6. Servidor de Steal a Brainrot").setStyle(TextInputStyle.Short).setRequired(true);
-        const p7 = new TextInputBuilder().setCustomId("p7").setLabel("7. Normativa de no retener brainrots").setStyle(TextInputStyle.Short).setRequired(true);
-        const p8 = new TextInputBuilder().setCustomId("p8").setLabel("8. Experiencia previa y dónde").setStyle(TextInputStyle.Paragraph).setRequired(true);
-        const p9 = new TextInputBuilder().setCustomId("p9").setLabel("9. Tradear SAB por otro juego").setStyle(TextInputStyle.Paragraph).setRequired(true);
-        const p10 = new TextInputBuilder().setCustomId("p10").setLabel("10. Entrega siempre con máquina").setStyle(TextInputStyle.Short).setRequired(true);
+        const p6 = new TextInputBuilder()
+            .setCustomId("p6")
+            .setLabel("6. ¿Tienes servidor de SAB? (Obligatorio)")
+            .setStyle(TextInputStyle.Short)
+            .setRequired(true);
 
-        modal2.addComponents(
+        const p7 = new TextInputBuilder()
+            .setCustomId("p7")
+            .setLabel("7. ¿Acuerdo de no retener brainrots?")
+            .setStyle(TextInputStyle.Paragraph)
+            .setRequired(true);
+
+        const p8 = new TextInputBuilder()
+            .setCustomId("p8")
+            .setLabel("8. Experiencia previa como MM y lugar")
+            .setStyle(TextInputStyle.Paragraph)
+            .setRequired(true);
+
+        const p9 = new TextInputBuilder()
+            .setCustomId("p9")
+            .setLabel("9. Tradear SAB por otro juego (Ej: Adopt Me)")
+            .setStyle(TextInputStyle.Paragraph)
+            .setRequired(true);
+
+        const p10 = new TextInputBuilder()
+            .setCustomId("p10")
+            .setLabel("10. Entrega de brainrots siempre con máquina")
+            .setStyle(TextInputStyle.Paragraph)
+            .setRequired(true);
+
+        modal.addComponents(
             new ActionRowBuilder().addComponents(p6),
             new ActionRowBuilder().addComponents(p7),
             new ActionRowBuilder().addComponents(p8),
@@ -149,12 +254,25 @@ module.exports = async (interaction) => {
             new ActionRowBuilder().addComponents(p10)
         );
 
-        return await interaction.showModal(modal2);
+        return await interaction.showModal(modal);
+
     }
 
-    // --- PROCESAR PARTE 2 Y ENVIAR A REVISIÓN CON KARMA ---
-    if (interaction.isModalSubmit() && interaction.customId === "modal_postulacion_mm_parte2") {
-        const datosParte1 = solicitudes.get(`mm_temp_${interaction.user.id}`) || {};
+
+
+
+    // --- 6. PROCESAR Y ENVIAR LAS 10 PREGUNTAS AL CANAL DE REVISIÓN ---
+    if (interaction.isModalSubmit() && interaction.customId === "modal_mm_parte2") {
+
+        const parte1 = solicitudes.get(`mm_temp_${interaction.user.id}`);
+
+        if (!parte1) {
+            return interaction.reply({
+                content: "❌ Hubo un error recuperando tus respuestas anteriores. Inténtalo de nuevo.",
+                ephemeral: true
+            });
+        }
+
         const p6 = interaction.fields.getTextInputValue("p6");
         const p7 = interaction.fields.getTextInputValue("p7");
         const p8 = interaction.fields.getTextInputValue("p8");
@@ -163,54 +281,59 @@ module.exports = async (interaction) => {
 
         solicitudes.delete(`mm_temp_${interaction.user.id}`);
 
-        // Algoritmo interno de karma / aptitud (1% a 100%)
-        let puntajeBase = 60;
-        const textoCompleto = Object.values({...datosParte1, p6, p7, p8, p9, p10}).join(" ").toLowerCase();
-        if (textoCompleto.length > 300) puntajeBase += 20;
-        if (textoCompleto.includes("si") || textoCompleto.includes("de acuerdo")) puntajeBase += 10;
-        if (p8.length > 20 && !p8.includes("no")) puntajeBase += 10;
-        const porcentajeAptitud = Math.min(Math.max(puntajeBase, 45), 98);
+        // Cálculo de karma / aptitud
+        let puntajeBase = 65;
+        const textoTotal = `${parte1.p3} ${parte1.p4} ${p8}`.toLowerCase();
+        if (textoTotal.length > 250) puntajeBase += 20;
+        if (textoTotal.includes("si") || textoTotal.includes("de acuerdo") || textoTotal.includes("experiencia")) puntajeBase += 10;
+        const porcentajeAptitud = Math.min(Math.max(puntajeBase, 50), 99);
 
-        const canalRevision = await interaction.client.channels.fetch(config.MIDDLEMAN_REVIEW_CHANNEL);
+        const canalRevision = await interaction.client.channels.fetch(
+            config.MIDDLEMAN_REVIEW_CHANNEL
+        );
+
         if (!canalRevision) {
-            return interaction.reply({ content: "❌ No se encontró el canal de revisión de postulaciones de Middleman.", ephemeral: true });
+            return interaction.reply({
+                content: "❌ No se encontró el canal de revisión de Middleman.",
+                ephemeral: true
+            });
         }
 
         const embed = new EmbedBuilder()
             .setColor("#8B5CF6")
-            .setTitle(`📋 Postulación Middleman - ${interaction.user.tag}`)
+            .setTitle(`📋 Postulación Completa Middleman - ${interaction.user.tag}`)
             .setDescription(
 `👤 **Postulante:** <@${interaction.user.id}> (\`${interaction.user.id}\`)
 🤖 **Sistema de Karma (Aptitud Estimada):** \`${porcentajeAptitud}%\`
 
-**1. Rango y garantía:**
-> ${datosParte1.p1 || "N/A"}
+**1. Rango y garantía deseada:**
+> ${parte1.p1}
 
-**2. Límite de cobro:**
-> ${datosParte1.p2 || "N/A"}
+**2. ¿Estás consciente de que no puedes cobrar más del límite admitido en el panel?:**
+> ${parte1.p2}
 
-**3. Estafa con Brainrot:**
-> ${datosParte1.p3 || "N/A"}
+**3. ¿Qué harías si alguno de los 2 miembros intenta estafar diciendo que ya te dio su Brainrot pero en realidad no te lo ha dado?:**
+> ${parte1.p3}
 
-**4. Normativa de No opinar:**
-> ${datosParte1.p4 || "N/A"}
+**4. ¿Estás de acuerdo con la normativa estricta de No opinar durante la atención de un ticket / Tradeo? (⚠️ Si lo haces perderás el rol de Middleman):**
+> ${parte1.p4}
 
-**5. Robux por Brainrots:**
-> ${datosParte1.p5 || "N/A"}
+**5. ¿Si alguien tradea robux por brainrots que debes hacer o cómo les brindarías la atención?:**
+> ${parte1.p5}
 
-**6. Servidor Steal a Brainrot:**
+**6. ¿Tienes servidor de Steal a Brainrot? (Obligatorio):**
 > ${p6}
 
-**7. No retener brainrots:**
+**7. ¿Estás de acuerdo con la normativa de no poder retener los brainrots de ambos usuarios? (⚠️ Hacer esto causará el retiro de tu rol):**
 > ${p7}
 
-**8. Experiencia previa:**
+**8. ¿Tienes experiencia previa como MiddleMan y si es así en donde?:**
 > ${p8}
 
-**9. SAB por otro juego:**
+**9. ¿Si tradean SAB por otro juego (Ejem: Adopt me) como les brindarías atención?:**
 > ${p9}
 
-**10. Entrega con máquina:**
+**10. ¿Estás de acuerdo con que la entrega de brainrots siempre debe ser con máquina? (⚠️ Es decir no puedes pedirle al usuario que ingrese a tu servidor):**
 > ${p10}`
             )
             .setTimestamp();
@@ -230,9 +353,10 @@ module.exports = async (interaction) => {
         });
 
         return await interaction.reply({
-            content: "✅ ¡Tu postulación ha sido enviada exitosamente a revisión!",
+            content: "✅ **¡Formulario enviado con éxito!** Tu postulación completa ha sido enviada al equipo de revisión.",
             ephemeral: true
         });
+
     }
 
 };
