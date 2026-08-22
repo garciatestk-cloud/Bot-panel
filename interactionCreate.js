@@ -127,31 +127,31 @@ module.exports = async (interaction) => {
 
         const p1 = new TextInputBuilder()
             .setCustomId("p1")
-            .setLabel("1. Rango y garantía deseada")
+            .setLabel("1. ¿Garantía que daras?")
             .setStyle(TextInputStyle.Paragraph)
             .setRequired(true);
 
         const p2 = new TextInputBuilder()
             .setCustomId("p2")
-            .setLabel("2. ¿Consciente del límite de cobro?")
+            .setLabel("2. ¿Estas consciente del límite de cobro?")
             .setStyle(TextInputStyle.Short)
             .setRequired(true);
 
         const p3 = new TextInputBuilder()
             .setCustomId("p3")
-            .setLabel("3. Estafa con Brainrot (¿Qué harías?)")
+            .setLabel("3. ¿Qué harías si intentan tradear algo no acordado?")
             .setStyle(TextInputStyle.Paragraph)
             .setRequired(true);
 
         const p4 = new TextInputBuilder()
             .setCustomId("p4")
-            .setLabel("4. Normativa de No opinar")
+            .setLabel("4. ¿Estas de acuerdo con no opinar durante el ticket?")
             .setStyle(TextInputStyle.Paragraph)
             .setRequired(true);
 
         const p5 = new TextInputBuilder()
             .setCustomId("p5")
-            .setLabel("5. Atención Robux por Brainrots")
+            .setLabel("5. ¿Como atenderias Robux por Brainrots?")
             .setStyle(TextInputStyle.Paragraph)
             .setRequired(true);
 
@@ -227,31 +227,31 @@ module.exports = async (interaction) => {
 
             const p6 = new TextInputBuilder()
                 .setCustomId("p6")
-                .setLabel("6. Servidor de SAB (Obligatorio)")
+                .setLabel("6. ¿Tienes Servidor de SAB? (Obligatorio)")
                 .setStyle(TextInputStyle.Short)
                 .setRequired(true);
 
             const p7 = new TextInputBuilder()
                 .setCustomId("p7")
-                .setLabel("7. Normativa de no retener brainrots")
+                .setLabel("7. Recuerda no retener los brainrots de ambos")
                 .setStyle(TextInputStyle.Paragraph)
                 .setRequired(true);
 
             const p8 = new TextInputBuilder()
                 .setCustomId("p8")
-                .setLabel("8. Experiencia previa como MM y lugar")
+                .setLabel("8. ¿Experiencia previa como MM y lugar?")
                 .setStyle(TextInputStyle.Paragraph)
                 .setRequired(true);
 
             const p9 = new TextInputBuilder()
                 .setCustomId("p9")
-                .setLabel("9. Tradear SAB por otro juego (Ej: Adopt Me)")
+                .setLabel("9. ¿Como atenderias SAB por otro juego? (Ej: Adopt Me)")
                 .setStyle(TextInputStyle.Paragraph)
                 .setRequired(true);
 
             const p10 = new TextInputBuilder()
                 .setCustomId("p10")
-                .setLabel("10. Entrega de brainrots con máquina")
+                .setLabel("10. Recuerda siempre entregar brainrots por máquina")
                 .setStyle(TextInputStyle.Paragraph)
                 .setRequired(true);
 
