@@ -3,6 +3,7 @@ const {
     ActionRowBuilder,
     ButtonBuilder,
     ButtonStyle,
+    StringSelectMenuBuilder,
     ModalBuilder,
     TextInputBuilder,
     TextInputStyle
@@ -144,7 +145,7 @@ module.exports = async (interaction) => {
 
         const p4 = new TextInputBuilder()
             .setCustomId("p4")
-            .setLabel("4. Normativa de No opinar (¿Estás de acuerdo?)")
+            .setLabel("4. Normativa de No opinar")
             .setStyle(TextInputStyle.Paragraph)
             .setRequired(true);
 
@@ -169,7 +170,7 @@ module.exports = async (interaction) => {
 
 
 
-    // --- 4. RECIBIR PARTE 1 Y MOSTRAR BOTÓN PARA LA PARTE 2 (Preguntas 6 a 10) ---
+    // --- 4. RECIBIR PARTE 1 Y MOSTRAR MENÚ DESPLEGABLE PARA LA PARTE 2 ---
     if (interaction.isModalSubmit() && interaction.customId === "modal_mm_parte1") {
 
         const respuestasParciales = {
@@ -182,17 +183,23 @@ module.exports = async (interaction) => {
 
         solicitudes.set(`mm_temp_${interaction.user.id}`, respuestasParciales);
 
-        const botonSiguiente = new ActionRowBuilder().addComponents(
-            new ButtonBuilder()
-                .setCustomId("abrir_mm_parte2")
-                .setLabel("Continuar con la Parte 2")
-                .setEmoji("➡️")
-                .setStyle(ButtonStyle.Secondary)
+        const menuSiguiente = new ActionRowBuilder().addComponents(
+            new StringSelectMenuBuilder()
+                .setCustomId("menu_mm_parte2")
+                .setPlaceholder("Selecciona una opción para continuar")
+                .addOptions([
+                    {
+                        label: "Continuar con la Parte 2",
+                        description: "Haz clic aquí para responder las últimas preguntas",
+                        value: "continuar_parte2",
+                        emoji: "➡️"
+                    }
+                ])
         );
 
         return await interaction.reply({
-            content: "✅ **¡Primera parte guardada con éxito!** Haz clic en el botón de abajo para responder las últimas preguntas de tu postulación.",
-            components: [botonSiguiente],
+            content: "✅ **¡Primera parte guardada con éxito!** Selecciona la opción en el menú de abajo para abrir las últimas preguntas.",
+            components: [menuSiguiente],
             ephemeral: true
         });
 
@@ -201,60 +208,64 @@ module.exports = async (interaction) => {
 
 
 
-    // --- 5. ABRIR PARTE 2 (Preguntas 6 a 10) ---
-    if (interaction.isButton() && interaction.customId === "abrir_mm_parte2") {
+    // --- 5. ABRIR PARTE 2 MEDIANTE EL MENÚ DESPLEGABLE (Preguntas 6 a 10) ---
+    if (interaction.isStringSelectMenu() && interaction.customId === "menu_mm_parte2") {
 
-        const temporal = solicitudes.get(`mm_temp_${interaction.user.id}`);
-        if (!temporal) {
-            return interaction.reply({
-                content: "❌ Tus respuestas anteriores expiraron. Por favor, vuelve a iniciar el formulario desde el panel principal.",
-                ephemeral: true
-            });
+        if (interaction.values[0] === "continuar_parte2") {
+
+            const temporal = solicitudes.get(`mm_temp_${interaction.user.id}`);
+            if (!temporal) {
+                return interaction.reply({
+                    content: "❌ Tus respuestas anteriores expiraron. Por favor, vuelve a iniciar el formulario.",
+                    ephemeral: true
+                });
+            }
+
+            const modal = new ModalBuilder()
+                .setCustomId("modal_mm_parte2")
+                .setTitle("Postulación Middleman (2/2)");
+
+            const p6 = new TextInputBuilder()
+                .setCustomId("p6")
+                .setLabel("6. Servidor de SAB (Obligatorio)")
+                .setStyle(TextInputStyle.Short)
+                .setRequired(true);
+
+            const p7 = new TextInputBuilder()
+                .setCustomId("p7")
+                .setLabel("7. Normativa de no retener brainrots")
+                .setStyle(TextInputStyle.Paragraph)
+                .setRequired(true);
+
+            const p8 = new TextInputBuilder()
+                .setCustomId("p8")
+                .setLabel("8. Experiencia previa como MM y lugar")
+                .setStyle(TextInputStyle.Paragraph)
+                .setRequired(true);
+
+            const p9 = new TextInputBuilder()
+                .setCustomId("p9")
+                .setLabel("9. Tradear SAB por otro juego (Ej: Adopt Me)")
+                .setStyle(TextInputStyle.Paragraph)
+                .setRequired(true);
+
+            const p10 = new TextInputBuilder()
+                .setCustomId("p10")
+                .setLabel("10. Entrega de brainrots con máquina")
+                .setStyle(TextInputStyle.Paragraph)
+                .setRequired(true);
+
+            modal.addComponents(
+                new ActionRowBuilder().addComponents(p6),
+                new ActionRowBuilder().addComponents(p7),
+                new ActionRowBuilder().addComponents(p8),
+                new ActionRowBuilder().addComponents(p9),
+                new ActionRowBuilder().addComponents(p10)
+            );
+
+            return await interaction.showModal(modal);
+
         }
-
-        const modal = new ModalBuilder()
-            .setCustomId("modal_mm_parte2")
-            .setTitle("Postulación Middleman (2/2)");
-
-        const p6 = new TextInputBuilder()
-            .setCustomId("p6")
-            .setLabel("6. ¿Tienes servidor de SAB? (Obligatorio)")
-            .setStyle(TextInputStyle.Short)
-            .setRequired(true);
-
-        const p7 = new TextInputBuilder()
-            .setCustomId("p7")
-            .setLabel("7. ¿Acuerdo de no retener brainrots?")
-            .setStyle(TextInputStyle.Paragraph)
-            .setRequired(true);
-
-        const p8 = new TextInputBuilder()
-            .setCustomId("p8")
-            .setLabel("8. Experiencia previa como MM y lugar")
-            .setStyle(TextInputStyle.Paragraph)
-            .setRequired(true);
-
-        const p9 = new TextInputBuilder()
-            .setCustomId("p9")
-            .setLabel("9. Tradear SAB por otro juego (Ej: Adopt Me)")
-            .setStyle(TextInputStyle.Paragraph)
-            .setRequired(true);
-
-        const p10 = new TextInputBuilder()
-            .setCustomId("p10")
-            .setLabel("10. Entrega de brainrots siempre con máquina")
-            .setStyle(TextInputStyle.Paragraph)
-            .setRequired(true);
-
-        modal.addComponents(
-            new ActionRowBuilder().addComponents(p6),
-            new ActionRowBuilder().addComponents(p7),
-            new ActionRowBuilder().addComponents(p8),
-            new ActionRowBuilder().addComponents(p9),
-            new ActionRowBuilder().addComponents(p10)
-        );
-
-        return await interaction.showModal(modal);
 
     }
 
