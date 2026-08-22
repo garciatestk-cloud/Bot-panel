@@ -85,17 +85,22 @@ module.exports = async (client) => {
                 .setDescription("Aplicar postulación para intermediario, interactúa con el panel para que tu solicitud sea enviada a revisión")
                 .setImage("https://cdn.discordapp.com/attachments/1426388948963299523/1540742071395295402/IMG_3091.jpg?ex=6a8b0f5f&is=6a89bddf&hm=75e41c11aaadbff00a7f13ec6de5585bef93b6998b2557be5e90f7bdb7ceedc0&");
 
-            const botonAbrir = new ActionRowBuilder().addComponents(
+            const rowMM = new ActionRowBuilder().addComponents(
                 new ButtonBuilder()
                     .setCustomId("abrir_formulario_mm")
                     .setLabel("Abrir formulario")
                     .setEmoji("📩")
+                    .setStyle(ButtonStyle.Secondary),
+                new ButtonBuilder()
+                    .setCustomId("ver_preguntas_mm")
+                    .setLabel("Ver Preguntas")
+                    .setEmoji("📋")
                     .setStyle(ButtonStyle.Secondary)
             );
 
             await channelMM.send({
                 embeds: [embedMM],
-                components: [botonAbrir]
+                components: [rowMM]
             });
 
             console.log("✅ Panel de Postulación Middleman enviado a su canal.");
